@@ -64,6 +64,9 @@ data/
   press **Save changes** (or **Discard**). Marks accept steps of 0.5.
 - **Print Question Paper** – A4 paper for students: name / roll no / class / date lines, time,
   total marks, sections with marks per question. No answers.
+  With **"With answer space"** ticked (default) it is a question-cum-answer paper: circles to fill
+  for MCQs and ruled lines under each question (about 2.5 lines per mark), roll number and page
+  number on every page. Untick it to print questions only (answers on separate sheets).
 - **Print Answer Key** – the same test with MCQ answers table, key points and model answers.
 - To share digitally (e.g. WhatsApp), choose **Save as PDF** as the printer in the print dialog.
 

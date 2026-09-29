@@ -153,6 +153,8 @@
           <button type="button" class="btn btn-primary" data-action="print-paper">Print Question Paper</button>
           <button type="button" class="btn" data-action="print-key">Print Answer Key</button>
           <button type="button" class="btn" data-action="regenerate">Regenerate</button>
+          <label class="check"><input type="checkbox" id="withSpace" ${withSpacePref() ? 'checked' : ''}>
+            With answer space <small class="muted">(students answer on the paper)</small></label>
         </div>
         <p class="edit-hint no-print">Tip: click any question, option, answer or mark to edit it, then press <b>Save changes</b>.</p>
 
@@ -343,9 +345,25 @@
   // ---------------- Printing ----------------
 
   /** kind: "paper" (for students, no answers) or "key" (for the teacher). */
+  /** "With answer space" choice, remembered in this browser (default on). */
+  function withSpacePref() {
+    try {
+      return localStorage.getItem('papercheck.withSpace') !== '0';
+    } catch {
+      return true;
+    }
+  }
+  output.addEventListener('change', (e) => {
+    if (e.target.id !== 'withSpace') return;
+    try {
+      localStorage.setItem('papercheck.withSpace', e.target.checked ? '1' : '0');
+    } catch { /* ignore */ }
+  });
+
   function printTest(kind) {
     const t = workingTest(); // prints exactly what is on screen, including unsaved edits
-    printArea.innerHTML = kind === 'key' ? renderAnswerKey(t) : renderQuestionPaper(t);
+    const withSpace = document.getElementById('withSpace').checked;
+    printArea.innerHTML = kind === 'key' ? renderAnswerKey(t) : renderQuestionPaper(t, withSpace);
     const oldTitle = document.title;
     document.title = `${t.title} – ${kind === 'key' ? 'Answer Key' : 'Question Paper'}`; // default PDF file name
     window.print();
@@ -361,36 +379,61 @@
       </header>`;
   }
 
-  function renderQuestionPaper(t) {
+  /** Number of ruled answer lines for a question, based on its marks. */
+  function answerLines(q) {
+    return Math.min(30, Math.max(3, Math.round((Number(q.marks) || 1) * 2.5))); // ~2.5 lines per mark
+  }
+
+  /**
+   * Question paper for students.
+   * withSpace = true: question-cum-answer paper (MCQ circles + ruled lines under
+   * each question). false: questions only, answers on separate sheets.
+   */
+  function renderQuestionPaper(t, withSpace) {
     const sections = SECTIONS.map((sec) => {
       const qs = t.questions.filter((q) => q.type === sec.type);
       if (!qs.length) return '';
-      const items = qs.map((q) => `
-        <div class="p-q">
+      const items = qs.map((q) => {
+        let body = '';
+        if (q.type === 'mcq') {
+          const twoCol = LETTERS.some((k) => String(q.options[k]).length > 22);
+          body = `<div class="p-options ${twoCol ? 'two-col' : ''} ${withSpace ? 'bubbles' : ''}">${LETTERS.map((k) =>
+            `<span>${withSpace ? '<i class="p-bubble"></i>' : ''}(${k}) ${escapeHtml(q.options[k])}</span>`).join('')}</div>`;
+        } else if (withSpace) {
+          body = `<div class="p-lines" style="--lines:${answerLines(q)}"></div>`;
+        }
+        return `
+        <div class="p-q ${q.type === 'long' && withSpace ? 'p-q-long' : ''}">
           <div class="p-q-head"><b class="p-q-id">${escapeHtml(q.id)}.</b>
             <span class="p-q-text">${escapeHtml(q.question)}</span>
             <span class="p-q-marks">(${escapeHtml(q.marks)})</span></div>
-          ${q.type === 'mcq' ? `<div class="p-options ${LETTERS.some((k) => String(q.options[k]).length > 22) ? 'two-col' : ''}">${LETTERS.map((k) =>
-            `<span>(${k}) ${escapeHtml(q.options[k])}</span>`).join('')}</div>` : ''}
-        </div>`).join('');
+          ${body}
+        </div>`;
+      }).join('');
+      const note = sec.type === 'mcq' && withSpace ? 'Fill in the circle of the correct option. Fill only one circle.' : sec.note;
       return `
         <section class="p-section">
           <h2>${escapeHtml(sec.title)} <span class="p-sec-marks">[${sumMarks(qs)} marks]</span></h2>
-          <p class="p-note">${escapeHtml(sec.note)}</p>
+          <p class="p-note">${escapeHtml(note)}</p>
           ${items}
         </section>`;
     }).join('');
 
-    return `
+    const instructions = withSpace
+      ? 'Attempt all questions. Write each answer in the space given below its question, in blue or black pen. '
+        + 'If you need more space, use an extra sheet and write the question number (e.g. B2) and your roll number on it.'
+      : 'Attempt all questions. Write your answers on the answer sheet and write the question number '
+        + '(e.g. A1, B2, C1) with each answer.';
+
+    return `<div class="p-paper">
       <div class="p-student">
         <span>Name: <i></i></span><span>Roll No: <i></i></span>
         <span>Class/Section: <i></i></span><span>Date: <i></i></span>
       </div>
       ${paperHeader(t)}
-      <p class="p-instructions"><b>Instructions:</b> Attempt all questions. Write your answers on the answer sheet and
-        write the question number (e.g. A1, B2, C1) with each answer.</p>
+      <p class="p-instructions"><b>Instructions:</b> ${instructions}</p>
       ${sections}
-      <p class="p-end">— End of Paper —</p>`;
+      <p class="p-end">— End of Paper —</p></div>`;
   }
 
   function renderAnswerKey(t) {

@@ -146,6 +146,8 @@ fieldset.student legend { font-weight: 700; padding: 0 .3rem; }
 .editable:focus { outline: 2px solid var(--primary); background: #f0fdfa; }
 .editable.block { display: block; margin-top: .15rem; white-space: pre-wrap; }
 .editable.marks { display: inline-block; min-width: 1.2em; text-align: center; }
+.check { display: inline-flex; align-items: center; gap: .35rem; font-size: .92rem; }
+.check input { width: 1.05rem; height: 1.05rem; }
 .answer select { width: auto; padding: .2rem .4rem; margin-left: .3rem; }
 .save-bar {
   position: sticky; bottom: 0; z-index: 5;
@@ -158,13 +160,21 @@ fieldset.student legend { font-weight: 700; padding: 0 .3rem; }
 /* ---------- Print layouts (question paper / answer key) ---------- */
 .print-only { display: none; }
 
-@page { size: A4; margin: 14mm 15mm; }
+@page {
+  size: A4; margin: 14mm 15mm;
+  @bottom-center { content: "Page " counter(page) " of " counter(pages); font-size: 9pt; }
+}
+/* Question paper pages also carry a Roll No field, in case pages get separated. */
+@page paper {
+  @top-right { content: "Roll No: ____________"; font-size: 10pt; }
+}
 @media print {
   body { background: #fff; color: #000; font-family: "Times New Roman", Times, serif; font-size: 12pt; line-height: 1.4; }
   /* On pages with a print area, only the print area is printed. */
   body:has(#printArea) > *:not(#printArea) { display: none !important; }
   .no-print { display: none !important; }
   #printArea { display: block !important; }
+  .p-paper { page: paper; }
 
   .p-student {
     display: grid; grid-template-columns: 2fr 1fr; gap: 3mm 8mm; margin-bottom: 5mm; font-size: 11.5pt;
@@ -196,6 +206,18 @@ fieldset.student legend { font-weight: 700; padding: 0 .3rem; }
     margin: 1mm 0 0 10mm;
   }
   .p-options.two-col { grid-template-columns: 1fr 1fr; }
+  /* MCQ circles to fill in */
+  .p-options.bubbles span { display: inline-flex; align-items: center; gap: 1.5mm; }
+  .p-bubble {
+    display: inline-block; width: 4mm; height: 4mm; border: 1px solid #000; border-radius: 50%; flex: none;
+  }
+  /* Ruled answer lines: --lines lines, 8 mm apart */
+  .p-lines {
+    height: calc(var(--lines) * 8mm); margin: 1mm 0 0 10mm;
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(8mm - 1px), #777 calc(8mm - 1px), #777 8mm);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .p-q-long { break-inside: auto; }
   .p-key { margin: 1mm 0 0 10mm; white-space: pre-wrap; font-size: 11pt; }
 
   .p-table { border-collapse: collapse; width: 100%; font-size: 11pt; }
