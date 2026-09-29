@@ -33,7 +33,7 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.status ? err.message : 'Something went wrong on the server. Please try again.' });
 });
 
-app.listen(config.port, () => {
+const server = app.listen(config.port, () => {
   console.log(`PaperCheck running at http://localhost:${config.port}`);
   if (!config.envFileExists) {
     console.warn(`Warning: no .env file found at ${config.envFile}`);
@@ -43,4 +43,14 @@ app.listen(config.port, () => {
   } else {
     console.log(`Gemini key loaded from ${config.envFile} (model: ${config.geminiModel})`);
   }
+});
+
+// Most common startup problem: an older PaperCheck is still running.
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${config.port} is already in use – PaperCheck (or another app) is probably already running.`);
+    console.error('Close the other terminal running it (Ctrl+C), or set a different PORT in .env, then run npm start again.');
+    process.exit(1);
+  }
+  throw err;
 });
