@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PaperCheck – Evaluate Answer Sheets</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="topbar no-print">
+    <a class="brand" href="/">PaperCheck</a>
+    <nav>
+      <a href="/">Create Test</a>
+      <a href="/evaluate.html" class="active">Evaluate Answer Sheets</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div id="keyWarning" class="alert alert-warn hidden no-print"></div>
+
+    <section class="card no-print">
+      <h1>Evaluate Answer Sheets</h1>
+      <p class="muted">Pick a saved test, add up to 5 students and upload photos or scans of their answer sheets.</p>
+
+      <label class="field">
+        <span>Test</span>
+        <select id="testSelect">
+          <option value="">— No saved tests yet —</option>
+        </select>
+      </label>
+
+      <div id="students"></div>
+
+      <div class="row">
+        <button type="button" class="btn" id="addStudentBtn">+ Add student</button>
+        <button type="button" class="btn btn-primary" id="evaluateBtn">Evaluate</button>
+      </div>
+
+      <div id="status" class="status hidden" role="status" aria-live="polite"></div>
+    </section>
+
+    <section id="results"></section>
+  </main>
+
+  <template id="studentTpl">
+    <fieldset class="student">
+      <legend>Student <span class="num"></span></legend>
+      <label class="field">
+        <span>Student name</span>
+        <input type="text" class="student-name" placeholder="e.g. Ayesha Khan">
+      </label>
+      <label class="field">
+        <span>Answer sheet pages <small>(JPG/PNG/PDF, max 10 MB each, in page order)</small></span>
+        <input type="file" class="student-files" accept="image/jpeg,image/png,application/pdf,.jpg,.jpeg,.png,.pdf" multiple>
+      </label>
+      <ol class="file-list"></ol>
+      <button type="button" class="btn btn-small btn-danger remove-student">Remove</button>
+    </fieldset>
+  </template>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/evaluate.js"></script>
+</body>
+</html>

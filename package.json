@@ -1,0 +1,20 @@
+{
+  "name": "papercheck",
+  "version": "0.1.0",
+  "description": "PaperCheck – generate printable tests from a chapter PDF and evaluate handwritten answer sheets with Gemini.",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@google/genai": "^2.24.0",
+    "dotenv": "^18.0.4",
+    "express": "^5.2.1",
+    "multer": "^2.4.0"
+  }
+}
