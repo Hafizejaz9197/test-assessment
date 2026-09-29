@@ -58,6 +58,15 @@ data/
 - If Gemini fails (busy, timeout, bad output) the call is retried once automatically.
 - Tests are saved to `data/tests/<testId>.json`; the chapter PDF stays in `data/uploads/`.
 
+## Editing and printing a test
+
+- Click any question, option, answer or mark on screen to edit it. Totals update as you type;
+  press **Save changes** (or **Discard**). Marks accept steps of 0.5.
+- **Print Question Paper** – A4 paper for students: name / roll no / class / date lines, time,
+  total marks, sections with marks per question. No answers.
+- **Print Answer Key** – the same test with MCQ answers table, key points and model answers.
+- To share digitally (e.g. WhatsApp), choose **Save as PDF** as the printer in the print dialog.
+
 ## Limits
 
 - Chapter PDF: 25 MB

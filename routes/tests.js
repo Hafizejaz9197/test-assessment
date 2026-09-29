@@ -8,7 +8,7 @@ const config = require('../config');
 const { chapterPdfUpload, UserError } = require('../services/upload');
 const gemini = require('../services/gemini');
 const storage = require('../services/storage');
-const { normalizeTest, countWarning } = require('../services/testFormat');
+const { normalizeTest, countWarning, applyEdits } = require('../services/testFormat');
 
 const router = express.Router();
 
@@ -95,10 +95,26 @@ router.post('/:id/regenerate', async (req, res) => {
   const saved = await storage.saveTest({
     ...existing,
     ...test,
+    title: existing.title, // keep the teacher's edited title and time
+    time: existing.time,
     model,
     updatedAt: new Date().toISOString(),
   });
   res.json({ test: saved, warning });
+});
+
+// PUT /api/tests/:id – save the teacher's inline edits (JSON body)
+router.put('/:id', async (req, res) => {
+  const existing = await storage.getTest(req.params.id);
+  if (!existing) throw new UserError('Test not found.', 404);
+  let updated;
+  try {
+    updated = applyEdits(existing, req.body || {});
+  } catch (err) {
+    throw new UserError(err.message, err.status || 400);
+  }
+  updated.updatedAt = new Date().toISOString();
+  res.json({ test: await storage.saveTest(updated) });
 });
 
 module.exports = router;

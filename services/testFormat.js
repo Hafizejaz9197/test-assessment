@@ -70,4 +70,53 @@ function countWarning(questions, params) {
   return off.length ? `The AI returned ${off.join(', ')}. You can regenerate to try again.` : null;
 }
 
-module.exports = { normalizeTest, countWarning, totalMarks };
+/**
+ * Apply a teacher's edits to a saved test. Only text fields and marks can
+ * change; question ids, types and order stay as they are.
+ * @returns updated copy of the test (throws Error with status 400 on bad input)
+ */
+function applyEdits(test, edits) {
+  const bad = (msg) => Object.assign(new Error(msg), { status: 400 });
+  const byId = new Map((Array.isArray(edits.questions) ? edits.questions : []).map((q) => [q && q.id, q]));
+
+  const title = str(edits.title) || test.title;
+  const time = str(edits.time) || test.time;
+
+  const questions = test.questions.map((q) => {
+    const e = byId.get(q.id);
+    if (!e) return q;
+    const next = { ...q };
+
+    if (e.question !== undefined) {
+      next.question = str(e.question);
+      if (!next.question) throw bad(`Question ${q.id} cannot be empty.`);
+    }
+    if (e.marks !== undefined) {
+      const m = Number(e.marks);
+      if (!Number.isFinite(m) || m < 0 || m > 100 || Math.round(m * 2) !== m * 2) {
+        throw bad(`Marks for ${q.id} must be a number from 0 to 100 (steps of 0.5).`);
+      }
+      next.marks = m;
+    }
+    if (e.answer_key !== undefined) next.answer_key = str(e.answer_key);
+    if (e.model_answer !== undefined) next.model_answer = str(e.model_answer);
+    // The answer key is needed later to mark answer sheets, so never allow it to be blank.
+    if (q.type !== 'mcq' && (!next.answer_key || !next.model_answer)) {
+      throw bad(`The key points and model answer for ${q.id} cannot be empty.`);
+    }
+
+    if (q.type === 'mcq') {
+      const o = e.options || {};
+      next.options = { ...q.options };
+      for (const k of ['a', 'b', 'c', 'd']) if (o[k] !== undefined) next.options[k] = str(o[k]);
+      next.answer_key = next.answer_key.toLowerCase();
+      if (!['a', 'b', 'c', 'd'].includes(next.answer_key)) throw bad(`Correct option for ${q.id} must be a, b, c or d.`);
+      next.model_answer = next.options[next.answer_key]; // keep in sync with the chosen option
+    }
+    return next;
+  });
+
+  return { ...test, title, time, questions, total_marks: totalMarks(questions) };
+}
+
+module.exports = { normalizeTest, countWarning, totalMarks, applyEdits };
