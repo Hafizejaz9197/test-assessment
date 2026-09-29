@@ -35,5 +35,12 @@ app.use((err, req, res, next) => {
 
 app.listen(config.port, () => {
   console.log(`PaperCheck running at http://localhost:${config.port}`);
-  if (!config.geminiApiKey) console.warn('Warning: GEMINI_API_KEY is not set in .env');
+  if (!config.envFileExists) {
+    console.warn(`Warning: no .env file found at ${config.envFile}`);
+    console.warn('Copy .env.example to .env and put your GEMINI_API_KEY in it, then restart.');
+  } else if (!config.geminiApiKey) {
+    console.warn(`Warning: GEMINI_API_KEY is empty in ${config.envFile}`);
+  } else {
+    console.log(`Gemini key loaded from ${config.envFile} (model: ${config.geminiModel})`);
+  }
 });
