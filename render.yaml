@@ -5,6 +5,7 @@ services:
     name: papercheck
     runtime: node
     plan: starter            # paid plan: needed for the persistent disk below
+    region: singapore        # closest Render region to Pakistan
     buildCommand: npm ci
     startCommand: npm start
     healthCheckPath: /api/health
