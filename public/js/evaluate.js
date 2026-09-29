@@ -79,7 +79,22 @@
     }
   }
 
+  /** Fill the test dropdown with saved tests (newest first). */
+  async function loadTests() {
+    const select = document.getElementById('testSelect');
+    try {
+      const { tests } = await apiFetch('/api/tests');
+      select.innerHTML = tests.length
+        ? '<option value="">— Choose a test —</option>' + tests.map((t) =>
+          `<option value="${escapeHtml(t.id)}">${escapeHtml(t.title)} (${escapeHtml(t.total_marks)} marks)</option>`).join('')
+        : '<option value="">— No saved tests yet. Create one first. —</option>';
+    } catch (err) {
+      showStatus(statusEl, 'error', err.message, loadTests);
+    }
+  }
+
   addBtn.addEventListener('click', addStudent);
+  loadTests();
   evalBtn.addEventListener('click', uploadCheck);
   addStudent(); // start with one student block
 })();

@@ -29,7 +29,8 @@ app.use('/api', (req, res) => res.status(404).json({ error: 'Not found.' }));
 // Error handling: friendly upload errors first, then a generic fallback.
 app.use(uploadErrorHandler);
 app.use((err, req, res, next) => {
-  console.error(err);
+  if (err.status) console.warn(`[${req.method} ${req.path}] ${err.status}: ${err.message}`);
+  else console.error(err); // unexpected – print the full stack
   res.status(err.status || 500).json({ error: err.status ? err.message : 'Something went wrong on the server. Please try again.' });
 });
 

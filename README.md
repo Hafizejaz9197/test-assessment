@@ -26,6 +26,7 @@ Open <http://localhost:3000>.
 |------------------|-------------------------------------------------|--------------------|
 | `GEMINI_API_KEY` | Your key from https://aistudio.google.com/apikey | *(required)*       |
 | `GEMINI_MODEL`   | Gemini model name                               | `gemini-3.8-flash` |
+| `GEMINI_FALLBACK_MODEL` | Model used for the one retry if the main model is busy (`none` = off) | `gemini-3.6-flash` |
 | `PORT`           | Port for the web server                         | `3000`             |
 
 The API key stays on the server; it is never sent to the browser.
@@ -38,7 +39,9 @@ config.js            Paths, limits, env settings
 routes/tests.js      /api/tests    – upload chapter PDF, generate & manage tests
 routes/evaluate.js   /api/evaluate – upload answer sheets, evaluate
 services/upload.js   Multer upload rules (file type / size) + friendly errors
-services/gemini.js   Gemini API calls (added in Milestone 2)
+services/gemini.js   Gemini API calls: retry once (fallback model if busy), timeouts, friendly errors
+services/testFormat.js  Cleans the AI's test: IDs A1/B1/C1, marks per type, recomputed total
+services/storage.js  JSON file storage for tests
 public/              Frontend: index.html, evaluate.html, css/, js/
 data/
   uploads/           Chapter PDFs
@@ -46,6 +49,14 @@ data/
   sheets/            Uploaded answer-sheet files
   results/           Evaluation results (<testId>-<timestamp>.json)
 ```
+
+## How test generation works
+
+- PDFs up to 10 MB are sent to Gemini inline; bigger PDFs (up to 25 MB) go through the Gemini Files API.
+- Gemini returns structured JSON (`responseSchema`). The server then fixes IDs, sets marks
+  (MCQ 1, short 2, long 6) and recomputes the total itself.
+- If Gemini fails (busy, timeout, bad output) the call is retried once automatically.
+- Tests are saved to `data/tests/<testId>.json`; the chapter PDF stays in `data/uploads/`.
 
 ## Limits
 

@@ -53,7 +53,7 @@ h2 { font-size: 1.2rem; }
   padding: 1.25rem; margin-bottom: 1rem;
 }
 .row { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
-.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; align-items: end; }
 @media (max-width: 700px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 420px) { .grid-4 { grid-template-columns: 1fr; } }
 
@@ -106,6 +106,35 @@ fieldset.student legend { font-weight: 700; padding: 0 .3rem; }
   animation: spin .8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Test display ---------- */
+.test-actions { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: flex-end; margin-bottom: .5rem; }
+.test-title { text-align: center; margin: .25rem 0; font-size: 1.35rem; }
+.test-meta { text-align: center; margin: 0 0 1rem; font-weight: 600; }
+.section-title {
+  font-size: 1.05rem; margin: 1.25rem 0 .5rem; padding-bottom: .25rem;
+  border-bottom: 2px solid var(--text);
+}
+.questions { list-style: none; margin: 0; padding: 0; }
+.question { padding: .6rem 0; border-bottom: 1px solid #eef0f3; }
+.q-head { display: flex; gap: .5rem; align-items: baseline; }
+.q-id { font-weight: 700; min-width: 2.2rem; }
+.q-text { flex: 1; white-space: pre-wrap; }
+.q-marks { white-space: nowrap; font-weight: 600; }
+.options {
+  list-style: none; padding: 0; margin: .4rem 0 0 2.7rem;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .2rem 1rem;
+}
+@media (max-width: 560px) { .options { grid-template-columns: 1fr; } }
+.options li.correct { color: var(--ok-text); font-weight: 600; }
+.answer { margin: .4rem 0 0 2.7rem; font-size: .92rem; color: #374151; }
+.answer summary { cursor: pointer; color: var(--primary); font-weight: 600; }
+.answer p { margin: .3rem 0; white-space: pre-wrap; }
+
+.test-list { list-style: none; padding: 0; margin: 0; }
+.test-list li { padding: .5rem 0; border-bottom: 1px solid #eef0f3; display: flex; flex-direction: column; }
+.test-list a { color: var(--primary); font-weight: 600; text-decoration: none; }
+.test-list a:hover { text-decoration: underline; }
 
 /* ---------- Print ---------- */
 @page { size: A4; margin: 15mm; }

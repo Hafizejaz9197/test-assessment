@@ -37,6 +37,10 @@ const config = {
   port: Number(process.env.PORT) || 3000,
   geminiApiKey: process.env.GEMINI_API_KEY || '',
   geminiModel: process.env.GEMINI_MODEL || 'gemini-3.8-flash',
+  // Used for the retry when the main model is overloaded (503/429). "none" disables it.
+  geminiFallbackModel: process.env.GEMINI_FALLBACK_MODEL === 'none'
+    ? ''
+    : process.env.GEMINI_FALLBACK_MODEL || 'gemini-3.6-flash',
 
   dirs: {
     data: DATA_DIR,
