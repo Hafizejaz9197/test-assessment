@@ -101,6 +101,10 @@
   // ---------------- Rendering ----------------
 
   function showTest(test) {
+    if (!test || !Array.isArray(test.questions)) {
+      // Usually means an older server version is still running.
+      throw new Error('The server sent an unexpected reply. Please restart it (Ctrl+C, then npm start) and try again.');
+    }
     currentTest = test;
     history.replaceState(null, '', `?id=${encodeURIComponent(test.id)}`);
     output.innerHTML = renderTest(test);
