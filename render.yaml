@@ -1,0 +1,25 @@
+# Render.com blueprint for PaperCheck (https://render.com/docs/blueprint-spec)
+# New > Blueprint > pick this repo. Render asks for the secret values below.
+services:
+  - type: web
+    name: papercheck
+    runtime: node
+    plan: starter            # paid plan: needed for the persistent disk below
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false          # you type it in the Render dashboard
+      - key: APP_PASSWORD
+        sync: false          # password teachers use to open the app
+      - key: GEMINI_MODEL
+        value: gemini-3.8-flash
+      - key: GEMINI_FALLBACK_MODEL
+        value: gemini-3.6-flash
+      - key: DATA_DIR
+        value: /var/data
+    disk:
+      name: papercheck-data
+      mountPath: /var/data   # tests, PDFs and results are kept here across restarts
+      sizeGB: 1

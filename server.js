@@ -8,9 +8,11 @@ const config = require('./config');
 const testsRouter = require('./routes/tests');
 const evaluateRouter = require('./routes/evaluate');
 const { uploadErrorHandler } = require('./services/upload');
+const { requirePassword } = require('./services/auth');
 
 const app = express();
 
+app.use(requirePassword); // no-op unless APP_PASSWORD is set
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -36,13 +38,16 @@ app.use((err, req, res, next) => {
 
 const server = app.listen(config.port, () => {
   console.log(`PaperCheck running at http://localhost:${config.port}`);
-  if (!config.envFileExists) {
-    console.warn(`Warning: no .env file found at ${config.envFile}`);
+  console.log(`Data folder: ${config.dirs.data}`);
+  console.log(config.appPassword ? 'Password protection: ON' : 'Password protection: off (set APP_PASSWORD to enable)');
+  if (config.geminiApiKey) {
+    const from = config.envFileExists ? config.envFile : 'environment variables';
+    console.log(`Gemini key loaded from ${from} (model: ${config.geminiModel})`);
+  } else if (!config.envFileExists) {
+    console.warn(`Warning: GEMINI_API_KEY is not set and there is no .env file at ${config.envFile}`);
     console.warn('Copy .env.example to .env and put your GEMINI_API_KEY in it, then restart.');
-  } else if (!config.geminiApiKey) {
-    console.warn(`Warning: GEMINI_API_KEY is empty in ${config.envFile}`);
   } else {
-    console.log(`Gemini key loaded from ${config.envFile} (model: ${config.geminiModel})`);
+    console.warn(`Warning: GEMINI_API_KEY is empty in ${config.envFile}`);
   }
 });
 

@@ -28,6 +28,8 @@ Open <http://localhost:3000>.
 | `GEMINI_MODEL`   | Gemini model name                               | `gemini-3.8-flash` |
 | `GEMINI_FALLBACK_MODEL` | Model used for the one retry if the main model is busy (`none` = off) | `gemini-3.6-flash` |
 | `PORT`           | Port for the web server                         | `3000`             |
+| `APP_PASSWORD`   | If set, the app asks for this password (any username) | *(off)*      |
+| `DATA_DIR`       | Folder for tests, PDFs and results              | `./data`           |
 
 The API key stays on the server; it is never sent to the browser.
 
@@ -74,3 +76,24 @@ data/
 
 - Chapter PDF: 25 MB
 - Answer sheets: JPG / PNG / PDF, 10 MB per file, up to 5 students per evaluation
+
+## Putting it online (Render.com)
+
+The repo includes `render.yaml`, so Render can set everything up.
+
+1. Sign up at <https://render.com> with your GitHub account.
+2. **New → Blueprint**, pick this repository and branch, then **Apply**.
+3. When asked, enter:
+   - `GEMINI_API_KEY` – your Gemini key
+   - `APP_PASSWORD` – a password teachers will type to open the app (**set this**, otherwise
+     anyone with the link can use your Gemini quota and see your tests)
+4. Wait for the first deploy (2–4 minutes). Your URL looks like `https://papercheck-xxxx.onrender.com`.
+
+`render.yaml` uses the paid **Starter** instance with a 1 GB persistent disk mounted at `/var/data`,
+so saved tests and results survive restarts and redeploys. The Free instance type works too
+(change `plan: starter` to `plan: free` and delete the `disk:` block) but **free instances
+lose all saved tests whenever they restart or redeploy**, and they sleep after ~15 minutes idle
+(the first visit then takes about a minute).
+
+Pushing new commits to the chosen branch redeploys automatically.
+

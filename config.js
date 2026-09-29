@@ -29,11 +29,15 @@ function loadEnvFile(file) {
   }
 }
 
-const DATA_DIR = path.join(__dirname, 'data');
+// Where tests, uploads and results are stored. On a host, point DATA_DIR at a
+// persistent disk (e.g. /var/data) so data survives restarts and redeploys.
+const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(__dirname, 'data'));
 
 const config = {
   envFile: ENV_FILE,
   envFileExists: fs.existsSync(ENV_FILE),
+  // Optional shared password for the whole app (recommended when online).
+  appPassword: process.env.APP_PASSWORD || '',
   port: Number(process.env.PORT) || 3000,
   geminiApiKey: process.env.GEMINI_API_KEY || '',
   geminiModel: process.env.GEMINI_MODEL || 'gemini-3.8-flash',
